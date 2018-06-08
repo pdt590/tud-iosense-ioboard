@@ -34,7 +34,7 @@ module.exports = {
   ** Plugins to load before mounting the App
   */
   plugins: [
-    '~/plugins/mqtt.js'
+    {src: '~/plugins/mqtt.js', ssr: false}
   ],
 
   /*

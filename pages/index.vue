@@ -15,14 +15,18 @@
 </template>
 
 <script>
-    import Logo from '~/components/Logo.vue'
-
     export default {
+        mqtt: {
+            'inTopic/#' (data, topic) {
+                // Print incomming data
+                console.log("Topic: " + topic,"-", "Data: " + String.fromCharCode.apply(null, data))
+            }
+        },
         components: {
             Logo
         },
         async mounted() {
-            this.$mqtt = await this.$mqtt
+            await this.$mqtt.subscribe('inTopic/#');
         },
         data() {
             return {
@@ -30,7 +34,7 @@
         },
         methods: {
             onPublish() {
-                this.$mqtt.publish('msg', 'Hello MQTT from NUXT');
+                this.$mqtt.publish('outTopic', 'Hello MQTT from NUXT');
             }
         }
     }

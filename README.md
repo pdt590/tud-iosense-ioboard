@@ -21,15 +21,23 @@ $ npm run generate
 
 ## Setup MQTT
 
-- Setup Mqtt using ```vue-mqttsocket``` on Nuxt : [Link](https://medium.com/@iman.tabrizian/connecting-nuxt-js-to-mqtt-1a6252842992)
+- Setup Mqtt using ```vue-mqtt``` on Nuxt : [Link 1](https://github.com/nik-zp/Vue-Mqtt) [Link 2](https://github.com/nik-zp/Vue-Mqtt-Example/tree/master/src/components)
     - Note: ```mqtt.js``` should be
         ```
         import Vue from 'vue'
-        import Mqtt from 'vue-mqttsocket'
-
-        if (process.browser) {
-            Vue.use(Mqtt, {uri: 'ws://localhost:9001'})
+        import Mqtt from 'vue-mqtt'
+        
+        const options =  {
+            clientId: 'WebClient-' + parseInt(Math.random() * 100000)
         }
+
+        Vue.use(Mqtt, 'ws://192.168.56.102:9001', options)
+        ```
+    - ```nuxt.config.js``` should be
+        ```
+        plugins: [
+            {src: '~/plugins/mqtt.js', ssr: false}
+        ],
         ```
 - Enable Websocket on Mosquitto:
     - Create ```mosquitto.conf```
