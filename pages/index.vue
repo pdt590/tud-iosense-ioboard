@@ -22,9 +22,6 @@
                 console.log("Topic: " + topic,"-", "Data: " + String.fromCharCode.apply(null, data))
             }
         },
-        components: {
-            Logo
-        },
         async mounted() {
             await this.$mqtt.subscribe('inTopic/#');
         },
