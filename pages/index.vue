@@ -15,12 +15,7 @@
 </template>
 
 <script>
-    import Logo from '~/components/Logo.vue'
-
     export default {
-        components: {
-            Logo
-        },
         async mounted() {
             this.$mqtt = await this.$mqtt
         },

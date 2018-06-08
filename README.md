@@ -31,6 +31,12 @@ $ npm run generate
             Vue.use(Mqtt, {uri: 'ws://localhost:9001'})
         }
         ```
+    - ```nuxt.config.js``` should be
+        ```
+        plugins: [
+            {src: '~/plugins/mqtt.js', ssr: false}
+        ],
+        ```
 - Enable Websocket on Mosquitto:
     - Create ```mosquitto.conf```
         ```
