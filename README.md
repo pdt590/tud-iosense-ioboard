@@ -19,4 +19,29 @@ $ npm start
 $ npm run generate
 ```
 
-For detailed explanation on how things work, checkout [Nuxt.js docs](https://nuxtjs.org).
+## Setup MQTT
+
+- Setup Mqtt using ```vue-mqttsocket``` on Nuxt : [Link](https://medium.com/@iman.tabrizian/connecting-nuxt-js-to-mqtt-1a6252842992)
+    - Note: ```mqtt.js``` should be
+        ```
+        import Vue from 'vue'
+        import Mqtt from 'vue-mqttsocket'
+
+        if (process.browser) {
+            Vue.use(Mqtt, {uri: 'ws://localhost:9001'})
+        }
+        ```
+- Enable Websocket on Mosquitto:
+    - Create ```mosquitto.conf```
+        ```
+        # this will listen for mqtt on tcp
+        listener 1883
+
+        # this will expect websockets connections
+        listener 8080
+        protocol websockets
+        ```
+    - Using docker [Link](https://hub.docker.com/_/eclipse-mosquitto/)
+        ```
+        docker run -it -p 1883:1883 -p 9001:9001 -v mosquitto.conf:/mosquitto/config/mosquitto.conf eclipse-mosquitto
+        ```

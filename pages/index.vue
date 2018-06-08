@@ -1,16 +1,14 @@
 <template>
     <section class="container">
         <div>
-            <logo/>
             <h1 class="title">
-                ioboard
+                Swimming Safety System
             </h1>
             <h2 class="subtitle">
                 A Dashboard Implementation for IoSense Project
             </h2>
-            <div class="links">
-                <a href="https://nuxtjs.org/" target="_blank" class="button--green">Documentation</a>
-                <a href="https://github.com/nuxt/nuxt.js" target="_blank" class="button--grey">GitHub</a>
+            <div>
+                <b-button variant="succsess" @click.prevent="onPublish">Publish Message</b-button>
             </div>
         </div>
     </section>
@@ -22,6 +20,18 @@
     export default {
         components: {
             Logo
+        },
+        async mounted() {
+            this.$mqtt = await this.$mqtt
+        },
+        data() {
+            return {
+            }
+        },
+        methods: {
+            onPublish() {
+                this.$mqtt.publish('msg', 'Hello MQTT from NUXT');
+            }
         }
     }
 </script>
@@ -34,20 +44,21 @@
         justify-content: center;
         align-items: center;
         text-align: center;
+        background: #b3e6ff
     }
     .title
     {
         font-family: "Quicksand", "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* 1 */
         display: block;
         font-weight: 300;
-        font-size: 100px;
+        font-size: 60px;
         color: #35495e;
         letter-spacing: 1px;
     }
     .subtitle
     {
         font-weight: 300;
-        font-size: 42px;
+        font-size: 20px;
         color: #526488;
         word-spacing: 5px;
         padding-bottom: 15px;
