@@ -27,9 +27,7 @@ $ npm run generate
         import Vue from 'vue'
         import Mqtt from 'vue-mqttsocket'
 
-        if (process.browser) {
-            Vue.use(Mqtt, {uri: 'ws://localhost:9001'})
-        }
+        Vue.use(Mqtt, {uri: 'ws://localhost:9001'})
         ```
     - ```nuxt.config.js``` should be
         ```
