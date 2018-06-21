@@ -34,7 +34,8 @@ module.exports = {
   ** Plugins to load before mounting the App
   */
   plugins: [
-    {src: '~/plugins/mqtt.js', ssr: false}
+    {src: '~/plugins/mqtt.js', ssr: false},
+    {src: '~/plugins/vuetrend.js', ssr: false}
   ],
 
   /*

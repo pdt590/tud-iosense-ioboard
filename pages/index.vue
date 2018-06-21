@@ -1,20 +1,52 @@
 <template>
     <section class="container">
         <div>
-            <h1 class="title">
-                Swimming Safety System
-            </h1>
-            <h2 class="subtitle">
-                A Dashboard Implementation for IoSense Project
+            <h2 class="title">
+                SmartLight System
             </h2>
+            <h3 class="subtitle">
+                A Dashboard Implementation for IoSense Project
+            </h3>
             <div>
                 <b-button variant="succsess" @click.prevent="onPublish">Publish Message</b-button>
+            </div>
+            <div style="margin-top: 40px; padding-top: 10px; border: solid">
+                <h4>
+                    Status: <span style="color: red"> Active </span>
+                </h4>
+            </div>
+            <div style="padding-top: 30px">
+                <div>
+                    <h4>TEMP: <span style="color: red">27</span> &#x2103;</h4>
+                </div>
+                <div>
+                    <trend
+                        :data="input"
+                        :gradient="['#6fa8dc', '#42b983', '#2c3e50']"
+                        auto-draw
+                        smooth>
+                    </trend>
+                </div>
+            </div>
+            <div style="padding-top: 30px">
+                <div>
+                    <h3>PRESSURE: <span style="color: red">27</span> Pa</h3>
+                </div>
+                <div>
+                    <trend
+                        :data="input"
+                        :gradient="['#6fa8dc', '#42b983', '#2c3e50']"
+                        auto-draw
+                        smooth>
+                    </trend>
+                </div>
             </div>
         </div>
     </section>
 </template>
 
 <script>
+    for(var i = 0, value = 0, size = 300, array = new Array(300); i < size; i++) array[i] = value;
     export default {
         mqtt: {
             'inTopic/#' (data, topic) {
@@ -27,11 +59,14 @@
         },
         data() {
             return {
-            }
+                input: array
+            };
         },
         methods: {
             onPublish() {
                 this.$mqtt.publish('outTopic', 'Hello MQTT from NUXT');
+                this.input.shift();
+                this.input.push(Math.floor((Math.random() * 1000) + 1));
             }
         }
     }
@@ -44,8 +79,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        text-align: center;
-        background: #b3e6ff
+        text-align: center
     }
     .title
     {
