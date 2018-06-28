@@ -5,12 +5,13 @@
   "author": "pdthang",
   "private": true,
   "scripts": {
-    "dev": "nuxt",
+    "dev": "cross-env HOST=0.0.0.0 PORT=3000 nuxt",
     "build": "nuxt build",
     "start": "nuxt start",
     "generate": "nuxt generate"
   },
   "dependencies": {
+    "@nuxtjs/axios": "^5.3.1",
     "bootstrap-vue": "^2.0.0-rc.11",
     "npm": "^6.1.0",
     "nuxt": "^1.4.0",

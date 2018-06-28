@@ -2,27 +2,37 @@
     <section class="container">
         <div>
             <h2 class="title">
-                SmartLight System
+                SmIght System
             </h2>
+            <!--
             <h3 class="subtitle">
                 A Dashboard Implementation for IoSense Project
             </h3>
-            <div>
-                <b-button variant="succsess" @click.prevent="onPublish">Publish Message</b-button>
+            -->
+            <div style="padding-top:50px">
+                <b-button variant="succsess" size="lg" @click.prevent="switchLight">
+                    <span style="font-size: 16px;">{{ lightState ? "Turn Off Light" : "Turn On Light"}}</span>
+                </b-button>
+                <!--
+                <b-button variant="succsess" @click.prevent="testPublish">Publish Message</b-button>
+                <b-button variant="succsess" @click.prevent="testControl">Control Hue</b-button>
+                -->
             </div>
-            <div style="margin-top: 40px; padding-top: 10px; border: solid">
+            <div style="margin-top: 50px;">
                 <h4>
-                    Status: <span style="color: red"> Active </span>
+                    Status: <span style="color: red"> {{ lightState ? "Detected Human" : "Idle"}} </span>
                 </h4>
             </div>
-            <div style="padding-top: 30px">
+            <div style="padding-top: 50px">
                 <div>
-                    <h4>TEMP: <span style="color: red">27</span> &#x2103;</h4>
+                    <h4>TEMP: <span style="color: red"> {{temp}}</span> &#x2103;</h4>
                 </div>
                 <div>
                     <trend
-                        :data="input"
+                        :data="tempData"
                         :gradient="['#6fa8dc', '#42b983', '#2c3e50']"
+                        :min="0"
+                        :max="50"
                         auto-draw
                         smooth>
                     </trend>
@@ -30,11 +40,11 @@
             </div>
             <div style="padding-top: 30px">
                 <div>
-                    <h3>PRESSURE: <span style="color: red">27</span> Pa</h3>
+                    <h4>PRESSURE: <span style="color: red">{{pressure}}</span> Pa</h4>
                 </div>
                 <div>
                     <trend
-                        :data="input"
+                        :data="pressureData"
                         :gradient="['#6fa8dc', '#42b983', '#2c3e50']"
                         auto-draw
                         smooth>
@@ -46,28 +56,79 @@
 </template>
 
 <script>
-    for(var i = 0, value = 0, size = 300, array = new Array(300); i < size; i++) array[i] = value;
+    for(var i = 0, initTemp = 0, initPressure = 100000, size = 50, tempArray = new Array(50), pressureArray = new Array(50); i < size; i++) {
+        tempArray[i] = initTemp
+        pressureArray[i] = initPressure    
+    }     
+
     export default {
         mqtt: {
-            'inTopic/#' (data, topic) {
+            'sensorData' (data, topic) {
+                let stringData = String.fromCharCode.apply(null, data)
+                let objData = JSON.parse(stringData)
+                this.tempData.shift()
+                this.tempData.push(objData.temp)
+                this.temp = objData.temp
+
+                this.pressureData.shift()
+                this.pressureData.push(objData.pressure)
+                this.pressure = objData.pressure
+
                 // Print incomming data
-                console.log("Topic: " + topic,"-", "Data: " + String.fromCharCode.apply(null, data))
+                // console.log("Topic: " + topic,"-", "Data: " + stringData)
+            },
+            'lightState' (data, topic) {
+                let stringData = String.fromCharCode.apply(null, data)
+                let objData = JSON.parse(stringData)
+
+                this.lightState = objData.lightState
+
+                let body = {"on": this.lightState}
+                this.$axios.$put("http://10.8.0.160/api/ikGFJudEmqoTLcni8oKrisAgj7sR87KHUPpJgDKA/lights/5/state", body)
+                    
+                // Print incomming data
+                // console.log("Topic: " + topic,"-", "Data: " + stringData)
             }
         },
         async mounted() {
-            await this.$mqtt.subscribe('inTopic/#');
+            Promise.all([
+                await this.$mqtt.subscribe('sensorData'),
+                await this.$mqtt.subscribe('lightState')
+            ])    
         },
         data() {
             return {
-                input: array
+                temp: 0,
+                tempData: tempArray,
+
+                pressure: 0,
+                pressureData: pressureArray,
+
+                lightState: false
             };
         },
         methods: {
-            onPublish() {
-                this.$mqtt.publish('outTopic', 'Hello MQTT from NUXT');
-                this.input.shift();
-                this.input.push(Math.floor((Math.random() * 1000) + 1));
-            }
+            testPublish() {
+                let fakeData = {
+                    "temp": Math.floor((Math.random() * 1000) + 1),
+                    "pressure": Math.floor((Math.random() * 1000) + 1),
+                    "lightState": true
+                }
+                this.$mqtt.publish('i/sensorProcessing', JSON.stringify(fakeData))
+                console.log(JSON.stringify(fakeData))
+            },
+            testControl() {
+                this.lightState = !this.lightState
+                let body = {"on": this.lightState}
+                this.$axios.$put("http://10.8.0.160/api/ikGFJudEmqoTLcni8oKrisAgj7sR87KHUPpJgDKA/lights/5/state", body)
+            },
+            switchLight() {
+                this.lightState = !this.lightState
+                let body = {"on": this.lightState}
+                this.$axios.$put("http://10.8.0.160/api/ikGFJudEmqoTLcni8oKrisAgj7sR87KHUPpJgDKA/lights/5/state", body)
+                let message = {"lightState": this.lightState }
+                this.$mqtt.publish('lightState', JSON.stringify(message))
+            }           
         }
     }
 </script>

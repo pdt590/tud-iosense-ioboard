@@ -42,6 +42,7 @@ module.exports = {
   ** Nuxt.js modules
   */
   modules: [
+    '@nuxtjs/axios',
     ['bootstrap-vue/nuxt', { css: false }]
   ],
 
