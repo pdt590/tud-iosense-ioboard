@@ -6,4 +6,3 @@ const options =  {
 }
 
 Vue.use(Mqtt, 'ws://10.8.0.198:9001', options)
-

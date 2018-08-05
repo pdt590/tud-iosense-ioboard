@@ -1,56 +1,53 @@
 <template>
     <section class="container">
         <div>
-            <h2 class="title">
-                SmIght System
+            <h2>
+                Lamp List
             </h2>
-            <!--
-            <h3 class="subtitle">
-                A Dashboard Implementation for IoSense Project
-            </h3>
-            -->
-            <div style="padding-top:50px">
-                <b-button variant="succsess" size="lg" @click.prevent="switchLight">
-                    <span style="font-size: 16px;">{{ lightState ? "Turn Off Light" : "Turn On Light"}}</span>
-                </b-button>
-                <!--
-                <b-button variant="succsess" @click.prevent="testPublish">Publish Message</b-button>
-                <b-button variant="succsess" @click.prevent="testControl">Control Hue</b-button>
-                -->
-            </div>
-            <div style="margin-top: 50px;">
-                <h4>
-                    Status: <span style="color: red"> {{ lightState ? "Detected Human" : "Idle"}} </span>
-                </h4>
-            </div>
-            <div style="padding-top: 50px">
-                <div>
-                    <h4>TEMP: <span style="color: red"> {{temp}}</span> &#x2103;</h4>
-                </div>
-                <div>
-                    <trend
-                        :data="tempData"
-                        :gradient="['#6fa8dc', '#42b983', '#2c3e50']"
-                        :min="0"
-                        :max="50"
-                        auto-draw
-                        smooth>
-                    </trend>
-                </div>
-            </div>
-            <div style="padding-top: 30px">
-                <div>
-                    <h4>PRESSURE: <span style="color: red">{{pressure}}</span> Pa</h4>
-                </div>
-                <div>
-                    <trend
-                        :data="pressureData"
-                        :gradient="['#6fa8dc', '#42b983', '#2c3e50']"
-                        auto-draw
-                        smooth>
-                    </trend>
-                </div>
-            </div>
+            <br>
+            <v-list>
+                <v-list-tile
+                    v-for="(lamp,i) in lampList"
+                    :key= i
+                >
+                    <v-list-tile-action>
+                        <v-icon v-if="!lamp.title" color="pink">star</v-icon>
+                    </v-list-tile-action>
+                    <v-list-tile-content style="margin-right: 50px; width: 120px">
+                        <v-list-tile-title v-text="lamp.lampName"></v-list-tile-title>
+                    </v-list-tile-content>
+                    <v-list-tile-content style="margin-right: 50px; width: 120px">
+                        <v-list-tile-title v-text="lamp.lampUrl"></v-list-tile-title>
+                    </v-list-tile-content>
+                    <v-list-tile-content style="margin-right: 50px; width: 120px">
+                        <v-list-tile-title v-text="lamp.lampState"></v-list-tile-title>
+                    </v-list-tile-content>
+                    <v-list-tile-action style="margin-right: 50px; width: 120px">
+                        <v-btn v-if="!lamp.title" medium color="success" @click="onConnect(lamp.lampUrl)">Connect</v-btn>
+                    </v-list-tile-action>
+                </v-list-tile>
+            </v-list>
+            <br><br>
+            <h2>
+                Cube-It List
+            </h2>
+            <br>
+            <v-list>
+                <v-list-tile
+                    v-for="(cube,i) in cubeList"
+                    :key= i
+                >
+                    <v-list-tile-content style="margin-right: 50px; width: 120px">
+                        <v-list-tile-title v-text="cube.cubeId"></v-list-tile-title>
+                    </v-list-tile-content>
+                    <v-list-tile-content style="margin-right: 50px; width: 120px">
+                        <v-list-tile-title v-text="cube.cubeState"></v-list-tile-title>
+                    </v-list-tile-content>
+                    <v-list-tile-content style="margin-right: 50px; width: 120px">
+                        <v-list-tile-title v-text="cube.cubeLampUrl"></v-list-tile-title>
+                    </v-list-tile-content>
+                </v-list-tile>
+            </v-list>
         </div>
     </section>
 </template>
@@ -59,7 +56,7 @@
     for(var i = 0, initTemp = 0, initPressure = 100000, size = 50, tempArray = new Array(50), pressureArray = new Array(50); i < size; i++) {
         tempArray[i] = initTemp
         pressureArray[i] = initPressure    
-    }     
+    } 
 
     export default {
         mqtt: {
@@ -77,34 +74,60 @@
                 // Print incomming data
                 // console.log("Topic: " + topic,"-", "Data: " + stringData)
             },
-            'lightState' (data, topic) {
+            'lampList' (data, topic) {
                 let stringData = String.fromCharCode.apply(null, data)
                 let objData = JSON.parse(stringData)
-
-                this.lightState = objData.lightState
-
-                let body = {"on": this.lightState}
-                this.$axios.$put("http://10.8.0.160/api/ikGFJudEmqoTLcni8oKrisAgj7sR87KHUPpJgDKA/lights/5/state", body)
-                    
-                // Print incomming data
-                // console.log("Topic: " + topic,"-", "Data: " + stringData)
+                //this.lampList = JSON.parse(objData.lampList)
+                this.lampList = [{
+                    title: true,
+                    lampName: "Name",
+                    lampUrl: "Lamp ID",
+                    lampState: "State"
+                }, ...JSON.parse(objData.lampList)]
+            },
+            'cubeList' (data, topic) {
+                let stringData = String.fromCharCode.apply(null, data)
+                let objData = JSON.parse(stringData)
+                let flag = false
+                objData = {...objData, updated: Date.now()}
+                //console.log(objData)
+                for (let i in this.cubeList) {
+                    if (objData.cubeId == this.cubeList[i].cubeId) {
+                        this.cubeList[i] = objData
+                        flag = true
+                    }
+                }
+                if (!flag) this.cubeList.push(objData)
+                let self = this;
+                setTimeout(function(){
+                    for (let i in self.cubeList) {
+                        if((Date.now() - self.cubeList[i].updated) > 5000) {
+                            self.cubeList.splice(i,1)
+                        }
+                    }
+                }, 1000)
             }
         },
         async mounted() {
             Promise.all([
                 await this.$mqtt.subscribe('sensorData'),
-                await this.$mqtt.subscribe('lightState')
-            ])    
+                await this.$mqtt.subscribe('lampList'),
+                await this.$mqtt.subscribe('cubeList')
+            ])
+            
         },
         data() {
             return {
                 temp: 0,
                 tempData: tempArray,
-
                 pressure: 0,
                 pressureData: pressureArray,
-
-                lightState: false
+                lampList: [],
+                cubeList: [{
+                    cubeId: "ID",
+                    cubeState: "Connected State",
+                    cubeLampUrl: "Lamp ID"
+                }]
             };
         },
         methods: {
@@ -128,7 +151,11 @@
                 this.$axios.$put("http://10.8.0.160/api/ikGFJudEmqoTLcni8oKrisAgj7sR87KHUPpJgDKA/lights/5/state", body)
                 let message = {"lightState": this.lightState }
                 this.$mqtt.publish('lightState', JSON.stringify(message))
-            }           
+            },
+            onConnect(url) {
+                let message = {"lampUrl": url }
+                this.$mqtt.publish('lampUrl', JSON.stringify(message))
+            }         
         }
     }
 </script>
@@ -141,26 +168,5 @@
         justify-content: center;
         align-items: center;
         text-align: center
-    }
-    .title
-    {
-        font-family: "Quicksand", "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* 1 */
-        display: block;
-        font-weight: 300;
-        font-size: 60px;
-        color: #35495e;
-        letter-spacing: 1px;
-    }
-    .subtitle
-    {
-        font-weight: 300;
-        font-size: 20px;
-        color: #526488;
-        word-spacing: 5px;
-        padding-bottom: 15px;
-    }
-    .links
-    {
-        padding-top: 15px;
     }
 </style>
