@@ -1,3 +1,4 @@
+const logger = require('connect-logger')
 
 module.exports = {
   /*
@@ -21,7 +22,7 @@ module.exports = {
   plugins: [
     {src: '~/plugins/vuetify.js'},
     {src: '~/plugins/mqtt.js', ssr: false},
-    {src: '~/plugins/vuetrend.js', ssr: false}
+    {src: '~/plugins/vue-carousel-3d.js', ssr: false}
   ],
   css: [
     '~/assets/style/app.styl'
@@ -34,14 +35,13 @@ module.exports = {
   ** Build configuration
   */
   build: {
-    vendor: [
-      '~/plugins/vuetify.js'
-    ],
     extractCSS: true,
     /*
     ** Run ESLint on save
     */
     extend (config, ctx) {
     }
-  }
+  },
+
+  serverMiddleware: [logger({ format: "%date %status %method %url (%time)" })]
 }

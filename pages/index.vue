@@ -1,172 +1,187 @@
 <template>
-    <section class="container">
-        <div>
-            <h2>
-                Lamp List
-            </h2>
-            <br>
-            <v-list>
-                <v-list-tile
-                    v-for="(lamp,i) in lampList"
-                    :key= i
+    <div class="v-demo">
+        <!-- Alert -->
+        <v-alert
+            v-model="alert"
+            dismissible
+            :type="isAccept ? 'success' : 'warning'"
+            style="margin-bottom: 6rem"
+        >
+            {{ isAccept ? 'Your order is accepted' : 'Your order is cancelled'}}
+        </v-alert>
+        <!-- Carousel  -->
+        <h2 style="padding: 1rem; border: solid 1px">
+            BEER MENU
+        </h2>
+        <no-ssr placeholder="Loading...">
+            <carousel-3d ref="mycarousel" :count="slides.length" :width="350" :height="400" :clickable="false">
+                <slide v-for="(slide, i) in slides" :index="i" :key="i">
+                    <figure>
+                        <img :src="`/${slide.img}.jpg`">
+                        <figcaption>
+                            {{ slide.name }}
+                        </figcaption>
+                    </figure>
+                </slide>
+            </carousel-3d>
+        </no-ssr>
+
+        <!-- Dialog -->
+        <v-dialog
+            v-model="dialog"
+            width="500"
+        >
+            <v-card>
+                <v-card-title
+                    class="headline grey lighten-2"
+                    primary-title
                 >
-                    <v-list-tile-action>
-                        <v-icon v-if="!lamp.title" color="pink">star</v-icon>
-                    </v-list-tile-action>
-                    <v-list-tile-content style="margin-right: 50px; width: 120px">
-                        <v-list-tile-title v-text="lamp.lampName"></v-list-tile-title>
-                    </v-list-tile-content>
-                    <v-list-tile-content style="margin-right: 50px; width: 120px">
-                        <v-list-tile-title v-text="lamp.lampUrl"></v-list-tile-title>
-                    </v-list-tile-content>
-                    <v-list-tile-content style="margin-right: 50px; width: 120px">
-                        <v-list-tile-title v-text="lamp.lampState"></v-list-tile-title>
-                    </v-list-tile-content>
-                    <v-list-tile-action style="margin-right: 50px; width: 120px">
-                        <v-btn v-if="!lamp.title" medium color="success" @click="onConnect(lamp.lampUrl)">Connect</v-btn>
-                    </v-list-tile-action>
-                </v-list-tile>
-            </v-list>
-            <br><br>
-            <h2>
-                Cube-It List
-            </h2>
-            <br>
-            <v-list>
-                <v-list-tile
-                    v-for="(cube,i) in cubeList"
-                    :key= i
-                >
-                    <v-list-tile-content style="margin-right: 50px; width: 120px">
-                        <v-list-tile-title v-text="cube.cubeId"></v-list-tile-title>
-                    </v-list-tile-content>
-                    <v-list-tile-content style="margin-right: 50px; width: 120px">
-                        <v-list-tile-title v-text="cube.cubeState"></v-list-tile-title>
-                    </v-list-tile-content>
-                    <v-list-tile-content style="margin-right: 50px; width: 120px">
-                        <v-list-tile-title v-text="cube.cubeLampUrl"></v-list-tile-title>
-                    </v-list-tile-content>
-                </v-list-tile>
-            </v-list>
-        </div>
-    </section>
+                    <span>🍺</span>
+                </v-card-title>
+
+                <v-card-text>
+                    <h4 class="headline mb-0">Do you agree?</h4>
+                </v-card-text>
+
+                <v-divider></v-divider>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                        color="green lighten-2"
+                        dark
+                        @click="dialog = false"
+                    >
+                        I accept
+                    </v-btn>
+                    <v-btn
+                        color="black lighten-2"
+                        dark
+                        @click="dialog = false"
+                    >
+                        Cancel
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+    </div>
 </template>
 
 <script>
-    for(var i = 0, initTemp = 0, initPressure = 100000, size = 50, tempArray = new Array(50), pressureArray = new Array(50); i < size; i++) {
-        tempArray[i] = initTemp
-        pressureArray[i] = initPressure    
-    } 
-
+    
     export default {
         mqtt: {
             'sensorData' (data, topic) {
-                let stringData = String.fromCharCode.apply(null, data)
-                let objData = JSON.parse(stringData)
-                this.tempData.shift()
-                this.tempData.push(objData.temp)
-                this.temp = objData.temp
+                const LEFT = 1 
+                const RIGHT = 2
+                const UP = 3
+                const DOWN = 4
 
-                this.pressureData.shift()
-                this.pressureData.push(objData.pressure)
-                this.pressure = objData.pressure
-
-                // Print incomming data
-                // console.log("Topic: " + topic,"-", "Data: " + stringData)
-            },
-            'lampList' (data, topic) {
                 let stringData = String.fromCharCode.apply(null, data)
                 let objData = JSON.parse(stringData)
-                //this.lampList = JSON.parse(objData.lampList)
-                this.lampList = [{
-                    title: true,
-                    lampName: "Name",
-                    lampUrl: "Lamp ID",
-                    lampState: "State"
-                }, ...JSON.parse(objData.lampList)]
-            },
-            'cubeList' (data, topic) {
-                let stringData = String.fromCharCode.apply(null, data)
-                let objData = JSON.parse(stringData)
-                let flag = false
-                objData = {...objData, updated: Date.now()}
-                //console.log(objData)
-                for (let i in this.cubeList) {
-                    if (objData.cubeId == this.cubeList[i].cubeId) {
-                        this.cubeList[i] = objData
-                        flag = true
-                    }
-                }
-                if (!flag) this.cubeList.push(objData)
-                let self = this;
-                setTimeout(function(){
-                    for (let i in self.cubeList) {
-                        if((Date.now() - self.cubeList[i].updated) > 5000) {
-                            self.cubeList.splice(i,1)
+                
+                switch(objData.gesture) {
+                    case RIGHT:
+                        if(this.dialog) {
+                            this.isAccept = false
+                            this.alert = true
+                            setTimeout(() => {
+                                this.isAccept = false
+                                this.alert = false
+                            }, 3000)
+                            this.dialog = false
+                            break
                         }
-                    }
-                }, 1000)
+                        this.currentIndex = this.currentIndex + 1
+                        if(this.currentIndex > (this.slides.length - 1)) this.currentIndex = 0
+                        //console.log('LEFT', this.currentIndex)
+                        this.$refs.mycarousel.goSlide(this.currentIndex)
+                        break
+                    case LEFT:
+                        if(this.dialog) {
+                            this.isAccept = true
+                            this.alert = true
+                            setTimeout(() => {
+                                this.isAccept = false
+                                this.alert = false
+                            }, 3000)
+                            this.dialog = false
+                            break
+                        }
+                        this.currentIndex = this.currentIndex - 1
+                        if(this.currentIndex < 0) this.currentIndex = (this.slides.length - 1)
+                        //console.log('RIGHT', this.currentIndex)
+                        this.$refs.mycarousel.goSlide(this.currentIndex)
+                        break
+                    case UP:
+                        this.dialog = true
+                        break
+                    default:
+                }
             }
         },
         async mounted() {
             Promise.all([
-                await this.$mqtt.subscribe('sensorData'),
-                await this.$mqtt.subscribe('lampList'),
-                await this.$mqtt.subscribe('cubeList')
+                await this.$mqtt.subscribe('sensorData')
             ])
-            
         },
         data() {
             return {
-                temp: 0,
-                tempData: tempArray,
-                pressure: 0,
-                pressureData: pressureArray,
-                lampList: [],
-                cubeList: [{
-                    cubeId: "ID",
-                    cubeState: "Connected State",
-                    cubeLampUrl: "Lamp ID"
-                }]
-            };
+                slides: [{
+                    name: 'Yebisu beer',
+                    img: '1'
+                }, {
+                    name: 'Fruli beer',
+                    img: '2'
+                }, {
+                    name: 'Budweiser beer',
+                    img: '3'
+                }, {
+                    name: 'Heineken beer',
+                    img: '4'
+                }, {
+                    name: 'Tiger beer',
+                    img: '5'
+                }],
+                currentIndex: 0,
+                alert: false,
+                dialog: false,
+                isAccept: false
+            }
         },
         methods: {
-            testPublish() {
-                let fakeData = {
-                    "temp": Math.floor((Math.random() * 1000) + 1),
-                    "pressure": Math.floor((Math.random() * 1000) + 1),
-                    "lightState": true
-                }
-                this.$mqtt.publish('i/sensorProcessing', JSON.stringify(fakeData))
-                console.log(JSON.stringify(fakeData))
+            goToSlide(index) {
+                this.$refs.mycarousel.goSlide(index)
             },
-            testControl() {
-                this.lightState = !this.lightState
-                let body = {"on": this.lightState}
-                this.$axios.$put("http://10.8.0.160/api/ikGFJudEmqoTLcni8oKrisAgj7sR87KHUPpJgDKA/lights/5/state", body)
+            onSelect() {
+                this.dialog = true
             },
-            switchLight() {
-                this.lightState = !this.lightState
-                let body = {"on": this.lightState}
-                this.$axios.$put("http://10.8.0.160/api/ikGFJudEmqoTLcni8oKrisAgj7sR87KHUPpJgDKA/lights/5/state", body)
-                let message = {"lightState": this.lightState }
-                this.$mqtt.publish('lightState', JSON.stringify(message))
-            },
-            onConnect(url) {
-                let message = {"lampUrl": url }
-                this.$mqtt.publish('lampUrl', JSON.stringify(message))
+            onConnect(data) {
+                let message = {"test": data }
+                this.$mqtt.publish('test', JSON.stringify(message))
             }         
         }
     }
 </script>
 
-<style>
-    .container
-    {
-        min-height: 100vh;
+<style scoped>
+    .v-demo {
+        background-color: rgb(250, 250, 250);
+        height: 100vh;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
-        text-align: center
+    }
+    .carousel-3d-container figcaption {
+        position: absolute;
+        bottom: 0;
+        padding: 2rem;
+        color: rgb(252, 252, 252);
+        font-size: 16px;
+        min-width: 100%;
+        text-align: end;
+        display: flex;
+        justify-content: center;
+        text-transform: uppercase;
     }
 </style>

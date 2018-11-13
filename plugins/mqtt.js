@@ -5,4 +5,4 @@ const options =  {
     clientId: 'WebClient-' + parseInt(Math.random() * 100000)
 }
 
-Vue.use(Mqtt, 'ws://10.8.0.198:9001', options)
+Vue.use(Mqtt, 'ws://192.168.1.15:9001', options)
