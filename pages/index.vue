@@ -175,8 +175,8 @@
     .carousel-3d-container figcaption {
         position: absolute;
         bottom: 0;
-        padding: 2rem;
-        color: rgb(252, 252, 252);
+        padding: 1rem;
+        color: red;
         font-size: 16px;
         min-width: 100%;
         text-align: end;
