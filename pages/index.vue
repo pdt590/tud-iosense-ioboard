@@ -4,20 +4,6 @@
             <h2 class="title">
                 SmIght System
             </h2>
-            <!--
-            <h3 class="subtitle">
-                A Dashboard Implementation for IoSense Project
-            </h3>
-            -->
-            <div style="padding-top:50px">
-                <b-button variant="succsess" size="lg" @click.prevent="switchLight">
-                    <span style="font-size: 16px;">{{ lightState ? "Turn Off Light" : "Turn On Light"}}</span>
-                </b-button>
-                <!--
-                <b-button variant="succsess" @click.prevent="testPublish">Publish Message</b-button>
-                <b-button variant="succsess" @click.prevent="testControl">Control Hue</b-button>
-                -->
-            </div>
             <div style="margin-top: 50px;">
                 <h4>
                     Status: <span style="color: red"> {{ lightState ? "Detected Human" : "Idle"}} </span>
@@ -58,7 +44,7 @@
 <script>
     for(var i = 0, initTemp = 0, initPressure = 100000, size = 50, tempArray = new Array(50), pressureArray = new Array(50); i < size; i++) {
         tempArray[i] = initTemp
-        pressureArray[i] = initPressure    
+        pressureArray[i] = initPressure
     }     
 
     export default {
@@ -80,12 +66,8 @@
             'lightState' (data, topic) {
                 let stringData = String.fromCharCode.apply(null, data)
                 let objData = JSON.parse(stringData)
-
-                this.lightState = objData.lightState
-
-                let body = {"on": this.lightState}
-                this.$axios.$put("http://10.8.0.160/api/ikGFJudEmqoTLcni8oKrisAgj7sR87KHUPpJgDKA/lights/5/state", body)
-                    
+                this.lightState = objData.on
+                
                 // Print incomming data
                 // console.log("Topic: " + topic,"-", "Data: " + stringData)
             }
